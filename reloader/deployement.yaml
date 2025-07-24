@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: configmap-dependent-app
+  annotations:
+        configmap.reloader.stakater.com/reload: "app-config"
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: configmap-dependent-app
+  template:
+    metadata:
+      labels:
+        app: configmap-dependent-app
+    spec:
+      containers:
+        - name: configmap-checker
+          image: configmap-checker:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_ENV
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DB_HOST
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LOG_LEVEL
+
+
